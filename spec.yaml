@@ -1,5 +1,19 @@
 endpoints:
   utxos:
+    asset:
+      request:
+        asset_name: AssetName
+        minting_policy_hash: ScriptHash
+      response:
+        utxos:
+          type: array
+          items: TransactionUnspentOutput
+    transaction_hash:
+      request: TransactionHash
+      response:
+        utxos:
+          type: array
+          items: TransactionUnspentOutput
     address:
       request:
         address: Address
@@ -21,6 +35,35 @@ endpoints:
         utxos:
           type: array
           items: TransactionUnspentOutput
+  block:
+    number:
+      request: UInt64
+      response:
+        block: Block
+    hash:
+      request: BlockHash
+      response:
+        block: Block
+  transaction:
+    hash:
+      request: TransactionHash
+      response: Transaction
+    submit:
+      request: Transaction
+      response: null
+  transactions:
+    block_number:
+      request: UInt64
+      response:
+        transactions:
+          type: array
+          items: Transaction
+    block_hash:
+      request: BlockHash
+      response:
+        transactions:
+          type: array
+          items: Transaction
   datum:
     hash:
       request:
@@ -39,8 +82,13 @@ endpoints:
         script_hash: ScriptHash
       response:
         native_script: NativeScript
+  metadata:
+    transaction_hash:
+      request: TransactionHash
+      response: TransactionMetadatum
   protocol_parameters:
     latest:
+      request: null
       response: ProtocolParamUpdate # TODO: make fields required
     epoch:
       request: UInt32

@@ -77,8 +77,6 @@ const convertToRPCSchema = (endpoints) => {
           schemaObj.properties = undefined;
           schemaObj.anyOf = alternatives;
 
-          return schemaObj;
-
         } else for (const [requestProperty, requestType] of Object.entries(requestBody)) {
           if (typeof requestType == 'string') {
 
@@ -88,7 +86,6 @@ const convertToRPCSchema = (endpoints) => {
               anyOf: alternatives
             };
 
-            return schemaObj;
           } else if (requestType.type == 'array') {
             schemaObj.properties[requestProperty] = {
               type: 'array',
@@ -96,11 +93,13 @@ const convertToRPCSchema = (endpoints) => {
                 anyOf: makeAnyOfAlternatives(schemas, requestType.items)
               }
             };
-            return schemaObj;
           } else {
-            console.warn('unknown requestType', requestBody);
+            throw new Error('unknown requestType ' + requestBody);
           }
         }
+
+        return schemaObj;
+
       };
 
       const requestSchema = buildObjectSchema(requestBody, REQUEST);

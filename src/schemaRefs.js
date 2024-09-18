@@ -57,5 +57,11 @@ export function resolveRefs(schema, definitions) {
 }
 
 // Expand refs for a single type in a schema
-export const expandSchemaRefs = (schema, requestType) =>
-  resolveRefs(schema, schema.definitions).definitions[requestType];
+export const expandSchemaRefs = (schema, requestType) => {
+  const newDefs = resolveRefs(schema, schema.definitions);
+  if (newDefs.definitions.hasOwnProperty(requestType)) {
+    return newDefs.definitions[requestType];
+  } else {
+    throw new Error("Unknown type: " + requestType);
+  }
+}
