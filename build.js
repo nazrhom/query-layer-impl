@@ -1,171 +1,31 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
 
+import { expandSchemaRefs } from './src/schemaRefs.js';
+import { DeepSet } from './src/deepSet.js';
+import { schemaRelativeCompare } from './src/schemaRelativeCompare.js';
+
 // Input YAML
 const yamlInput = fs.readFileSync('./spec.yaml').toString();
-const conway = JSON.parse(fs.readFileSync('./CIPs/CIP-0116/cardano-conway.json').toString());
-const babbage = JSON.parse(fs.readFileSync('./CIPs/CIP-0116/cardano-babbage.json').toString());
+
+// Add new in the future
+const schemas = [
+  [
+    "cardano-conway.json#/definitions/",
+    JSON.parse(fs.readFileSync('./CIPs/CIP-0116/cardano-conway.json').toString())
+  ],
+  [
+    "cardano-babbage.json#/definitions/",
+    JSON.parse(fs.readFileSync('./CIPs/CIP-0116/cardano-babbage.json').toString())
+  ]
+];
 
 // Parse YAML to JSON
 const parsedYaml = yaml.load(yamlInput);
 
-function isEqual(value1, value2) {
-  if (value1 === value2) {
-    return true;
-  }
-
-  if (typeof value1 !== 'object' || value1 === null || typeof value2 !== 'object' || value2 === null) {
-    return false;
-  }
-
-  const keys1 = Object.keys(value1);
-  const keys2 = Object.keys(value2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (let key of keys1) {
-    if (!keys2.includes(key) || !isEqual(value1[key], value2[key])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function deepEqualUpToRefSchema(value1, value2) {
-  if (value1 === value2) {
-    return true;
-  }
-
-  if (typeof value1 !== 'object' || value1 === null || typeof value2 !== 'object' || value2 === null) {
-    return false;
-  }
-
-  const keys1 = Object.keys(value1);
-  const keys2 = Object.keys(value2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (let key of keys1) {
-    if (key == '$ref') {
-      return value1[key].split('#')[1] ==
-        value2[key].split('#')[1];
-    }
-
-    if (!keys2.includes(key) || !deepEqualUpToRefSchema(value1[key], value2[key])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-class DeepSet {
-  constructor(comparator) {
-    this.items = []; // To store objects
-    this.comparator = comparator;
-  }
-
-  add(item) {
-    if (!this.has(item)) {
-      this.items.push(item);
-    }
-  }
-
-  has(item) {
-    return this.items.some(existingItem => this.comparator(existingItem, item));
-  }
-
-  delete(item) {
-    const index = this.items.findIndex(existingItem => this.comparator(existingItem, item));
-    if (index !== -1) {
-      this.items.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
-
-  get size() {
-    return this.items.length;
-  }
-
-  clear() {
-    this.items = [];
-  }
-
-  [Symbol.iterator]() {
-    return this.items[Symbol.iterator]();
-  }
-}
-
-function resolveRefs(schema, definitions) {
-  // maintain a stack to handle cyclic refs
-  const stack = [];
-
-  function resolveRefsImpl (schema, definitions) {
-    if (typeof schema === 'object' && schema !== null) {
-      if ('$ref' in schema) {
-        // "cardano-babbage.json#/definitions/RewardAddress"
-        const refPath = schema['$ref'].split('/');
-        const refKey = refPath[2];
-
-        if (stack.includes(refKey)) {
-          stack.push(refKey);
-          const res = getNestedProperty(definitions, refKey);
-          stack.pop();
-          return res;
-        } else  {
-          stack.push(refKey);
-          const res = resolveRefsImpl(getNestedProperty(definitions, refKey), definitions);
-          stack.pop();
-          return res;
-        }
-      }
-
-      const resolvedSchema = Array.isArray(schema) ? [] : {};
-
-      for (const key in schema) {
-        resolvedSchema[key] = resolveRefsImpl(schema[key], definitions);
-      }
-
-      return resolvedSchema;
-    }
-
-    return schema;
-  }
-
-  return resolveRefsImpl(schema, definitions);
-}
-
-function getNestedProperty(obj, path) {
-  return path.split('.').reduce((acc, key) => (acc && acc[key] !== 'undefined') ? acc[key] : undefined, obj);
-}
-
-function inlineRefs(schema) {
-
-  if (!schema.definitions) {
-    throw new Error('No definitions found in the schema');
-  }
-
-  const inlinedSchema = resolveRefs(schema, schema.definitions);
-
-  return inlinedSchema;
-}
-
-const mkDigest = (schema, requestType) =>
-      resolveRefs(schema, schema.definitions).definitions[requestType];
-
 // Function to convert parsed YAML to OpenAPI format
 const convertToRPCSchema = (endpoints) => {
   const paths = {};
-  const schemas = [
-    [ "cardano-conway.json#/definitions/", conway ],
-    [ "cardano-babbage.json#/definitions/", babbage ]
-  ];
 
   Object.keys(endpoints).forEach(endpoint => {
     Object.keys(endpoints[endpoint]).forEach(operation => {
@@ -180,10 +40,11 @@ const convertToRPCSchema = (endpoints) => {
 
         const makeAnyOfAlternatives = (schemas, requestType) => {
           const alternatives = [];
-          const altSet = new DeepSet(deepEqualUpToRefSchema);
+
+          const altSet = new DeepSet(schemaRelativeCompare);
 
           schemas.forEach(([ref, schema]) => {
-            const digest = mkDigest(schema, requestType);
+            const digest = expandSchemaRefs(schema, requestType);
 
             if (altSet.has(digest)) return;
             altSet.add(digest);
@@ -237,7 +98,6 @@ const convertToRPCSchema = (endpoints) => {
       const responseSchema = buildObjectSchema(responseBody);
       paths[endpoint + '/' + operation + ':response'] = responseSchema;
 
-      // paths[endpoint + '_response'] = responseBody;
     });
   });
 
