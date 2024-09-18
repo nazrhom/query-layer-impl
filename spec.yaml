@@ -1,0 +1,48 @@
+endpoints:
+  utxos:
+    address:
+      request:
+        address: Address
+      response:
+        utxos:
+          type: array
+          items: TransactionUnspentOutput
+    payment_credential:
+      request:
+        credential: Credential
+      response:
+        utxos:
+          type: array
+          items: TransactionUnspentOutput
+    stake_credential:
+      request:
+        credential: RewardAddress
+      response:
+        utxos:
+          type: array
+          items: TransactionUnspentOutput
+  datum:
+    hash:
+      request:
+        hash: DataHash
+      response:
+        datum: PlutusData
+  plutus_script:
+    hash:
+      request:
+        script_hash: ScriptHash
+      response:
+        plutus_script: PlutusScript
+  native_script:
+    hash:
+      request:
+        script_hash: ScriptHash
+      response:
+        native_script: NativeScript
+  protocol_parameters:
+    latest:
+      response: ProtocolParamUpdate # TODO: make fields required
+    epoch:
+      request: UInt32
+      response:
+        ProtocolParamUpdate # TODO: make fields required
