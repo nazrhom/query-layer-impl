@@ -49,6 +49,7 @@ endpoints:
       request: TransactionHash
       response: Transaction
     submit:
+      method: post # must be lowercase
       request: Transaction
       response: null
   transactions:

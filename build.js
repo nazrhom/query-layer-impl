@@ -27,12 +27,18 @@ const schemas = [
 const parsedYaml = yaml.load(yamlInput);
 
 // Function to convert parsed YAML to OpenAPI format
-const convertToRPCSchema = (endpoints) => {
+const convertToSchemas = (endpoints) => {
+  const definitions = {};
   const paths = {};
 
   Object.keys(endpoints).forEach(endpoint => {
     Object.keys(endpoints[endpoint]).forEach(operation => {
       const requestBody = endpoints[endpoint][operation].request;
+      const method = endpoints[endpoint][operation].method || 'get';
+
+      if (!['post', 'get'].includes(method)) {
+        throw new Error('unknown method ' + method);
+      }
 
       const buildObjectSchema = (requestBody, type) => {
         const schemaObj = {
@@ -103,53 +109,30 @@ const convertToRPCSchema = (endpoints) => {
       };
 
       const requestSchema = buildObjectSchema(requestBody, REQUEST);
-      paths[endpoint + '/' + operation + ':request'] = requestSchema;
+      definitions[endpoint + '/' + operation + ':request'] = requestSchema;
 
       const responseBody = endpoints[endpoint][operation].response;
       const responseSchema = buildObjectSchema(responseBody, RESPONSE);
-      paths[endpoint + '/' + operation + ':response'] = responseSchema;
-
-    });
-  });
-
-  const schema = {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "cardano-query-layer.json",
-    "title": "Cardano Query Layer types",
-    "definitions": paths
-  };
-
-  return schema;
-};
-
-// Function to convert parsed YAML to OpenAPI format
-const convertToOpenAPI = (endpoints) => {
-  const paths = {};
-
-  Object.keys(endpoints).forEach(endpoint => {
-    Object.keys(endpoints[endpoint]).forEach(operation => {
-      const requestBody = endpoints[endpoint][operation].request;
-      const responseBody = endpoints[endpoint][operation].response;
+      definitions[endpoint + '/' + operation + ':response'] = responseSchema;
 
       paths[`/${endpoint}/${operation}`] = {
-        post: {
-          summary: `${operation} operation on ${endpoint}`,
+        [method]: {
+          summary: ``,
           requestBody: {
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: requestBody,
-                },
+                schema: requestSchema,
               },
             },
           },
           responses: {
+            '404': {
+            },
             '200': {
               description: 'Successful response',
               content: {
                 'application/json': {
-                  schema: responseBody,
+                  schema: responseSchema,
                 },
               },
             },
@@ -159,23 +142,30 @@ const convertToOpenAPI = (endpoints) => {
     });
   });
 
-  return {
+  const schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "cardano-query-layer.json",
+    "title": "Cardano Query Layer types",
+    definitions
+  };
+
+  const openApiSchema = {
     openapi: '3.0.0',
     info: {
-      title: 'Auto-Generated API',
+      title: 'Cardano Query Layer Specification',
       version: '1.0.0',
     },
     paths,
   };
+
+  return [schema, openApiSchema];
 };
 
-// Convert to OpenAPI JSON
-const openApiSpec = convertToOpenAPI(parsedYaml.endpoints);
-const jsonSpec = convertToRPCSchema(parsedYaml.endpoints);
-console.log(JSON.stringify(jsonSpec, null, 2));
-// // Output the result as a JSON file
-// const outputPath = './openapi.json';
+const [jsonSpec, openApiSpec] = convertToSchemas(parsedYaml.endpoints);
 
-// fs.writeFileSync(outputPath, JSON.stringify(openApiSpec, null, 2));
+console.log(JSON.stringify(openApiSpec, null, 2));
 
-// console.log(`OpenAPI specification generated at ${outputPath}`);
+fs.writeFileSync('./openapi.json', JSON.stringify(openApiSpec, null, 2));
+fs.writeFileSync('./json-rpc.json', JSON.stringify(jsonSpec, null, 2));
+
+console.warn(`Regenerated: openapi.json, json-rpc.json`);
