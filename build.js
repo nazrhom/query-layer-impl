@@ -8,6 +8,9 @@ import { schemaRelativeCompare } from './src/schemaRelativeCompare.js';
 // Input YAML
 const yamlInput = fs.readFileSync('./spec.yaml').toString();
 
+const REQUEST = Symbol('REQUEST');
+const RESPONSE = Symbol('RESPONSE');
+
 // Add new in the future
 const schemas = [
   [
@@ -31,9 +34,17 @@ const convertToRPCSchema = (endpoints) => {
     Object.keys(endpoints[endpoint]).forEach(operation => {
       const requestBody = endpoints[endpoint][operation].request;
 
-      const buildObjectSchema = (requestBody) => {
+      const buildObjectSchema = (requestBody, type) => {
         const schemaObj = {
-          title: endpoint + ' by ' + operation,
+          title: endpoint + (
+            operation == 'latest' ? ' (latest)' :
+              operation == 'submit' ? ' submission' :
+              ' by ' + operation
+          ) + (
+            type === REQUEST ? ' (request)' :
+              type === RESPONSE ? ' (response)' :
+              ''
+          ),
           type: 'object',
           properties: {}
         };
@@ -57,7 +68,9 @@ const convertToRPCSchema = (endpoints) => {
           return alternatives;
         };
 
-        if (typeof requestBody == 'string') {
+        if (requestBody === null) {
+          return schemaObj;
+        } else if (typeof requestBody == 'string') {
 
           const alternatives = makeAnyOfAlternatives(schemas, requestBody);
 
@@ -90,12 +103,11 @@ const convertToRPCSchema = (endpoints) => {
         }
       };
 
-      if (requestBody) {
-        const requestSchema = buildObjectSchema(requestBody);
-        paths[endpoint + '/' + operation + ':request'] = requestSchema;
-      }
+      const requestSchema = buildObjectSchema(requestBody, REQUEST);
+      paths[endpoint + '/' + operation + ':request'] = requestSchema;
+
       const responseBody = endpoints[endpoint][operation].response;
-      const responseSchema = buildObjectSchema(responseBody);
+      const responseSchema = buildObjectSchema(responseBody, RESPONSE);
       paths[endpoint + '/' + operation + ':response'] = responseSchema;
 
     });
