@@ -15,29 +15,27 @@ endpoints:
           type: array
           items: TransactionUnspentOutput
     address:
-      request:
-        address: Address
+      request: Address
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
     payment_credential:
-      request:
-        credential: Credential
+      request: Credential
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
     stake_credential:
-      request:
-        credential: RewardAddress
+      request: RewardAddress
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
   block:
     number:
-      request: UInt64
+      request:
+        block_number: UInt64
       response:
         block: Block
     hash:
@@ -54,7 +52,8 @@ endpoints:
       response: null
   transactions:
     block_number:
-      request: UInt64
+      request:
+        block_number: UInt64
       response:
         transactions:
           type: array
@@ -67,20 +66,17 @@ endpoints:
           items: Transaction
   datum:
     hash:
-      request:
-        hash: DataHash
+      request: DataHash
       response:
         datum: PlutusData
   plutus_script:
     hash:
-      request:
-        script_hash: ScriptHash
+      request: ScriptHash
       response:
         plutus_script: PlutusScript
   native_script:
     hash:
-      request:
-        script_hash: ScriptHash
+      request: ScriptHash
       response:
         native_script: NativeScript
   metadata:
@@ -92,6 +88,7 @@ endpoints:
       request: null
       response: ProtocolParamUpdate # TODO: make fields required
     epoch:
-      request: UInt32
+      request:
+        epoch_number: UInt32
       response:
         ProtocolParamUpdate # TODO: make fields required
