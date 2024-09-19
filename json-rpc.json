@@ -1,0 +1,370 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardano-query-layer.json",
+  "title": "Cardano Query Layer types",
+  "definitions": {
+    "utxos/asset:request": {
+      "title": "utxos by asset (request)",
+      "type": "object",
+      "properties": {
+        "asset_name": {
+          "$ref": "cardano-conway.json#/definitions/AssetName"
+        },
+        "minting_policy_hash": {
+          "$ref": "cardano-conway.json#/definitions/ScriptHash"
+        }
+      }
+    },
+    "utxos/asset:response": {
+      "title": "utxos by asset (response)",
+      "type": "object",
+      "properties": {
+        "utxos": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/TransactionUnspentOutput"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/TransactionUnspentOutput"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "utxos/transaction_hash:request": {
+      "title": "utxos by transaction_hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/TransactionHash"
+    },
+    "utxos/transaction_hash:response": {
+      "title": "utxos by transaction_hash (response)",
+      "type": "object",
+      "properties": {
+        "utxos": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/TransactionUnspentOutput"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/TransactionUnspentOutput"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "utxos/address:request": {
+      "title": "utxos by address (request)",
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "cardano-conway.json#/definitions/Address"
+        },
+        {
+          "$ref": "cardano-babbage.json#/definitions/Address"
+        }
+      ]
+    },
+    "utxos/address:response": {
+      "title": "utxos by address (response)",
+      "type": "object",
+      "properties": {
+        "utxos": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/TransactionUnspentOutput"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/TransactionUnspentOutput"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "utxos/payment_credential:request": {
+      "title": "utxos by payment_credential (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/Credential"
+    },
+    "utxos/payment_credential:response": {
+      "title": "utxos by payment_credential (response)",
+      "type": "object",
+      "properties": {
+        "utxos": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/TransactionUnspentOutput"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/TransactionUnspentOutput"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "utxos/stake_credential:request": {
+      "title": "utxos by stake_credential (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/RewardAddress"
+    },
+    "utxos/stake_credential:response": {
+      "title": "utxos by stake_credential (response)",
+      "type": "object",
+      "properties": {
+        "utxos": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/TransactionUnspentOutput"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/TransactionUnspentOutput"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "block/number:request": {
+      "title": "block by number (request)",
+      "type": "object",
+      "properties": {
+        "block_number": {
+          "$ref": "cardano-conway.json#/definitions/UInt64"
+        }
+      }
+    },
+    "block/number:response": {
+      "title": "block by number (response)",
+      "type": "object",
+      "properties": {
+        "block": {
+          "anyOf": [
+            {
+              "$ref": "cardano-conway.json#/definitions/Block"
+            },
+            {
+              "$ref": "cardano-babbage.json#/definitions/Block"
+            }
+          ]
+        }
+      }
+    },
+    "block/hash:request": {
+      "title": "block by hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/BlockHash"
+    },
+    "block/hash:response": {
+      "title": "block by hash (response)",
+      "type": "object",
+      "properties": {
+        "block": {
+          "anyOf": [
+            {
+              "$ref": "cardano-conway.json#/definitions/Block"
+            },
+            {
+              "$ref": "cardano-babbage.json#/definitions/Block"
+            }
+          ]
+        }
+      }
+    },
+    "transaction/hash:request": {
+      "title": "transaction by hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/TransactionHash"
+    },
+    "transaction/hash:response": {
+      "title": "transaction by hash (response)",
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "cardano-conway.json#/definitions/Transaction"
+        },
+        {
+          "$ref": "cardano-babbage.json#/definitions/Transaction"
+        }
+      ]
+    },
+    "transaction/submit:request": {
+      "title": "transaction submission (request)",
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "cardano-conway.json#/definitions/Transaction"
+        },
+        {
+          "$ref": "cardano-babbage.json#/definitions/Transaction"
+        }
+      ]
+    },
+    "transaction/submit:response": {
+      "title": "transaction submission (response)",
+      "type": "object",
+      "properties": {}
+    },
+    "transactions/block_number:request": {
+      "title": "transactions by block_number (request)",
+      "type": "object",
+      "properties": {
+        "block_number": {
+          "$ref": "cardano-conway.json#/definitions/UInt64"
+        }
+      }
+    },
+    "transactions/block_number:response": {
+      "title": "transactions by block_number (response)",
+      "type": "object",
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/Transaction"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/Transaction"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "transactions/block_hash:request": {
+      "title": "transactions by block_hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/BlockHash"
+    },
+    "transactions/block_hash:response": {
+      "title": "transactions by block_hash (response)",
+      "type": "object",
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "cardano-conway.json#/definitions/Transaction"
+              },
+              {
+                "$ref": "cardano-babbage.json#/definitions/Transaction"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "datum/hash:request": {
+      "title": "datum by hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/DataHash"
+    },
+    "datum/hash:response": {
+      "title": "datum by hash (response)",
+      "type": "object",
+      "properties": {
+        "datum": {
+          "$ref": "cardano-conway.json#/definitions/PlutusData"
+        }
+      }
+    },
+    "plutus_script/hash:request": {
+      "title": "plutus_script by hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/ScriptHash"
+    },
+    "plutus_script/hash:response": {
+      "title": "plutus_script by hash (response)",
+      "type": "object",
+      "properties": {
+        "plutus_script": {
+          "anyOf": [
+            {
+              "$ref": "cardano-conway.json#/definitions/PlutusScript"
+            },
+            {
+              "$ref": "cardano-babbage.json#/definitions/PlutusScript"
+            }
+          ]
+        }
+      }
+    },
+    "native_script/hash:request": {
+      "title": "native_script by hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/ScriptHash"
+    },
+    "native_script/hash:response": {
+      "title": "native_script by hash (response)",
+      "type": "object",
+      "properties": {
+        "native_script": {
+          "$ref": "cardano-conway.json#/definitions/NativeScript"
+        }
+      }
+    },
+    "metadata/transaction_hash:request": {
+      "title": "metadata by transaction_hash (request)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/TransactionHash"
+    },
+    "metadata/transaction_hash:response": {
+      "title": "metadata by transaction_hash (response)",
+      "type": "object",
+      "$ref": "cardano-conway.json#/definitions/TransactionMetadatum"
+    },
+    "protocol_parameters/latest:request": {
+      "title": "protocol_parameters (latest) (request)",
+      "type": "object",
+      "properties": {}
+    },
+    "protocol_parameters/latest:response": {
+      "title": "protocol_parameters (latest) (response)",
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "cardano-conway.json#/definitions/ProtocolParamUpdate"
+        },
+        {
+          "$ref": "cardano-babbage.json#/definitions/ProtocolParamUpdate"
+        }
+      ]
+    },
+    "protocol_parameters/epoch:request": {
+      "title": "protocol_parameters by epoch (request)",
+      "type": "object",
+      "properties": {
+        "epoch_number": {
+          "$ref": "cardano-conway.json#/definitions/UInt32"
+        }
+      }
+    },
+    "protocol_parameters/epoch:response": {
+      "title": "protocol_parameters by epoch (response)",
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "cardano-conway.json#/definitions/ProtocolParamUpdate"
+        },
+        {
+          "$ref": "cardano-babbage.json#/definitions/ProtocolParamUpdate"
+        }
+      ]
+    }
+  }
+}
