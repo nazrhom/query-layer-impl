@@ -1,13 +1,20 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
 import { Case } from 'change-case-all';
+import { JSONSchemaFaker } from "json-schema-faker";
 
 import { expandSchemaRefs } from './src/schemaRefs.js';
 import { DeepSet } from './src/deepSet.js';
 import { schemaRelativeCompare } from './src/schemaRelativeCompare.js';
 
-// Input YAML
-const yamlInput = fs.readFileSync('./spec.yaml').toString();
+// jsf options
+JSONSchemaFaker.option({ minLength: 10, maxItems: 2, useDefaultValue: true, random: () => 0.2 });
+JSONSchemaFaker.format("string64", () =>
+  JSONSchemaFaker.random.randexp("[0-9a-zA-Z]{10-64}")
+);
+JSONSchemaFaker.format("string128", () =>
+  JSONSchemaFaker.random.randexp("[0-9a-zA-Z]{10-64}")
+);
 
 const REQUEST = Symbol('REQUEST');
 const RESPONSE = Symbol('RESPONSE');
@@ -24,9 +31,9 @@ const schemas = [
   ]
 ];
 
-// Parse YAML to JSON
-const parsedYaml = yaml.load(yamlInput);
-
+/*
+---- Helpers ----
+*/
 const buildTitle = (endpoint, operation, type) => {
   return endpoint + (
     operation == 'latest' ? ' (latest)' :
@@ -49,7 +56,6 @@ const makeAnyOfAlternatives = (schemas, requestType) => {
 
     if (altSet.has(digest)) return;
     altSet.add(digest);
-    // console.log(digest);
     alternatives.push({
       "$ref": ref + requestType
     });
@@ -58,9 +64,54 @@ const makeAnyOfAlternatives = (schemas, requestType) => {
   return alternatives;
 };
 
+// Input is the request/response type used in spec.yaml which contains refs to the cardano-cip-0116 schemas
+// We expand and resolve all refs in the input schema, and then specialize it to remove any choice (anyOf/oneOf).
+const specialiseRequestBody = (requestBody) => {
+  const expanded = expandRequestBody(requestBody);
+
+  if (Array.isArray(expanded.anyOf)) {
+    const pick = expanded.anyOf[0];
+    delete expanded.anyOf;
+    delete pick.title;
+    return {...expanded, ...pick};
+  }
+  if (Array.isArray(expanded.oneOf)) {
+    const pick = expanded.oneOf[0];
+    delete expanded.oneOf;
+    delete expanded.discriminator;
+    delete pick.title;
+    return {...expanded, ...pick};
+  } else return expanded;
+}
+
+// expandSchemaRefs specialised to conway schema
+const expandWithLatestSchema = (prop) => expandSchemaRefs(schemas[0][1], prop);
+
+// Schema corresponding to null
+const nullSchema = { type: null };
+
+// resolve all refs in the input with `expandWithLatestSchema`
+const expandRequestBody = (requestBody) => {
+  if (requestBody === null) {
+    return nullSchema;
+  } else if (typeof requestBody === 'string') {
+    return expandWithLatestSchema(requestBody);
+  } else if (typeof requestBody == 'object') {
+    for (const [requestProperty, requestType] of Object.entries(requestBody)) {
+      if (typeof requestType == 'string') {
+        requestBody[requestProperty] = expandRequestBody(requestType);
+
+      } else if (requestType.type == 'array') {
+        requestType.items = expandRequestBody(requestType.items);
+      }
+    }
+    return requestBody
+  } else { throw new Error('Unimplemented') }
+}
+
 const buildAnyOfSchema = (alternatives) => alternatives.length == 1 ? alternatives[0] : ({ anyOf: alternatives });
 
-const buildOpenApiSchemaGetParameters = (endpoint, operation, requestBody, type) => {
+const buildOpenApiSchemaGetParameters = (requestBody) => {
   let res = [];
 
   if (requestBody === null) {
@@ -200,7 +251,7 @@ const convertToSchemas = (endpoints) => {
       };
 
       if (method == 'get') {
-        const parameters = buildOpenApiSchemaGetParameters(endpoint, operation, requestBody, REQUEST);
+        const parameters = buildOpenApiSchemaGetParameters(requestBody);
         paths[`/${endpoint}/${operation}`].get.parameters = parameters;
       } else if (method == 'post') {
         paths[`/${endpoint}/${operation}`].post.requestBody = {
@@ -241,11 +292,70 @@ const convertToSchemas = (endpoints) => {
   return [schema, openApiSchema];
 };
 
-const [jsonSpec, openApiSpec] = convertToSchemas(parsedYaml.endpoints);
+const titleCase = (str) => Case.title(str.split('_').join(' '))
 
-console.log(JSON.stringify(openApiSpec, null, 2));
+const generateMD = (endpoints) => {
+  let res = '';
+  const addMDLine = (line = '') => {
+    res += `\n${line}`;
+  }
+
+  const wrapCollapsibleCode = (str) => {
+    addMDLine('<details>');
+    addMDLine('<summary>Show example: </summary>');
+    addMDLine();
+    addMDLine(`\`\`\`\n${str}\n\`\`\``);
+    addMDLine('</details>');
+  }
+
+  for (const endpoint of Object.keys(endpoints)) {
+    addMDLine(`## ${titleCase(endpoint)}`);
+    addMDLine();
+
+    for (const operation of Object.keys(endpoints[endpoint])) {
+      const operationDetails = endpoints[endpoint][operation];
+      const specialisedRequestSchema = specialiseRequestBody(operationDetails.request);
+      const specialisedResponseSchema = specialiseRequestBody(operationDetails.response);
+
+      addMDLine(`### ${titleCase(operation)}`);
+      addMDLine();
+      addMDLine(`${operationDetails.description}`);
+      addMDLine();
+      if (specialisedRequestSchema != nullSchema) {
+        addMDLine(`#### Request`);
+        addMDLine();
+        wrapCollapsibleCode(`${JSON.stringify(JSONSchemaFaker.generate(specialisedRequestSchema, schemas))}`);
+        addMDLine();
+      }
+
+      if (specialisedResponseSchema != nullSchema) {
+        addMDLine(`#### Response`);
+        addMDLine();
+        wrapCollapsibleCode(`${JSON.stringify(JSONSchemaFaker.generate(specialisedResponseSchema, schemas))}`);
+        addMDLine();
+      }
+    }
+  }
+  return res;
+}
+
+/*
+---- Main ----
+*/
+
+// Input YAML
+const yamlInput = fs.readFileSync('./spec.yaml').toString();
+
+// Parse YAML to JSON
+const parsedYaml = yaml.load(yamlInput);
+
+const [jsonSpec, openApiSpec] = convertToSchemas(parsedYaml.endpoints);
+const markdownSpec = generateMD(parsedYaml.endpoints);
+
+// console.log(JSON.stringify(openApiSpec, null, 2));
 
 fs.writeFileSync('./openapi.json', JSON.stringify(openApiSpec, null, 2));
 fs.writeFileSync('./json-rpc.json', JSON.stringify(jsonSpec, null, 2));
+fs.writeFileSync("./cip-spec.md", markdownSpec);
 
-console.warn(`Regenerated: openapi.json, json-rpc.json`);
+console.warn(`Regenerated: openapi.json, json-rpc.json, cip-spec.md`);

@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "change-case-all": "^2.1.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "json-schema-faker": "^0.5.6"
   }
 }

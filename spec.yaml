@@ -8,48 +8,67 @@ endpoints:
         utxos:
           type: array
           items: TransactionUnspentOutput
+      description: >-
+        Get all UTxOs that contain some of the specified asset
     transaction_hash:
       request: TransactionHash
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
+      description: >-
+        Get all UTxOs produced by the transaction
+        [These are only outputs, should they be in/outs??]
     address:
       request: Address
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
+      description: >-
+        Get all UTxOs present at the address
     payment_credential:
       request: Credential
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
+      description: >-
+        Get all UTxOs present at the addresses which use the payment credential
     stake_credential:
       request: RewardAddress
       response:
         utxos:
           type: array
           items: TransactionUnspentOutput
+      description: >-
+        Get all UTxOs present at the addresses which use the stake credential
   block:
     number:
       request:
         block_number: UInt64
       response:
         block: Block
+      description: >-
+        Get the block with the supplied block number
     hash:
       request: BlockHash
       response:
         block: Block
+      description: >-
+        Get the block with the supplied block hash
   transaction:
     hash:
       request: TransactionHash
       response: Transaction
+      description: >-
+        Get the transaction with the supplied transaction hash
     submit:
       method: post # must be lowercase
       request: Transaction
       response: null
+      description: >-
+        Submit a signed transaction to the cardano node.
   transactions:
     block_number:
       request:
@@ -58,37 +77,53 @@ endpoints:
         transactions:
           type: array
           items: Transaction
+      description: >-
+        Get all transactions contained in the block with the supplied block number []
     block_hash:
       request: BlockHash
       response:
         transactions:
           type: array
           items: Transaction
+      description: >-
+        Get all transactions contained in the block with the supplied block hash
   datum:
     hash:
       request: DataHash
       response:
         datum: PlutusData
+      description: >-
+        Get the datum that hashes to the supplied data hash
   plutus_script:
     hash:
       request: ScriptHash
       response:
         plutus_script: PlutusScript
+      description: >-
+        Get the plutus script that hashes to the supplied script hash
   native_script:
     hash:
       request: ScriptHash
       response:
         native_script: NativeScript
+      description: >-
+        Get the native script that hashes to the supplied script hash
   metadata:
     transaction_hash:
       request: TransactionHash
       response: TransactionMetadatum
+      description: >-
+        Get the metadata present on the transaction with the supplied transaction hash
   protocol_parameters:
     latest:
       request: null
       response: ProtocolParamUpdate # TODO: make fields required
+      description: >-
+        Get the latest protocol parameters
     epoch:
       request:
         epoch_number: UInt32
       response:
         ProtocolParamUpdate # TODO: make fields required
+      description: >-
+        Get the protocol parameters at the supplied epoch number
