@@ -8,6 +8,7 @@ Get all UTxOs that contain some of the specified asset
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -43,6 +44,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -1392,6 +1394,7 @@ Get all UTxOs produced by the transaction [These are only outputs, should they b
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -1418,6 +1421,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -2767,6 +2771,7 @@ Get all UTxOs present at the address
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -2788,6 +2793,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -4137,6 +4143,7 @@ Get all UTxOs present at the addresses which use the payment credential
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -4162,6 +4169,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -5511,6 +5519,7 @@ Get all UTxOs present at the addresses which use the stake credential
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -5535,6 +5544,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -6886,6 +6896,7 @@ Get the block with the supplied block number
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -6915,6 +6926,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -16825,6 +16837,7 @@ Get the block with the supplied block hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -16851,6 +16864,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -26763,6 +26777,7 @@ Get the transaction with the supplied transaction hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -26789,6 +26804,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -36454,6 +36470,7 @@ Submit a signed transaction to the cardano node.
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -46121,6 +46138,7 @@ Get all transactions contained in the block with the supplied block number []
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -46150,6 +46168,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -55823,6 +55842,7 @@ Get all transactions contained in the block with the supplied block hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -55849,6 +55869,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -65524,6 +65545,7 @@ Get the datum that hashes to the supplied data hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -65548,6 +65570,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -67721,6 +67744,7 @@ Get the plutus script that hashes to the supplied script hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -67745,6 +67769,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -67801,6 +67826,7 @@ Get the native script that hashes to the supplied script hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -67825,6 +67851,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -69741,6 +69768,7 @@ Get the metadata present on the transaction with the supplied transaction hash
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -69767,6 +69795,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -69829,6 +69858,7 @@ Get the latest protocol parameters
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -70340,6 +70370,7 @@ Get the protocol parameters at the supplied epoch number
 #### Request
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
@@ -70369,6 +70400,7 @@ Schema:
 #### Response
 
 Schema:
+
 <details>
 <summary>Show Schema: </summary>
 
