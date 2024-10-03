@@ -34,6 +34,8 @@ const schemas = [
 /*
 ---- Helpers ----
 */
+const prettyJSON = (json) => JSON.stringify(json, null, 2)
+
 const buildTitle = (endpoint, operation, type) => {
   return endpoint + (
     operation == 'latest' ? ' (latest)' :
@@ -66,9 +68,7 @@ const makeAnyOfAlternatives = (schemas, requestType) => {
 
 // Input is the request/response type used in spec.yaml which contains refs to the cardano-cip-0116 schemas
 // We expand and resolve all refs in the input schema, and then specialize it to remove any choice (anyOf/oneOf).
-const specialiseRequestBody = (requestBody) => {
-  const expanded = expandRequestBody(requestBody);
-
+const specialiseRequestBody = (expanded) => {
   if (Array.isArray(expanded.anyOf)) {
     const pick = expanded.anyOf[0];
     delete expanded.anyOf;
@@ -300,11 +300,15 @@ const generateMD = (endpoints) => {
     res += `\n${line}`;
   }
 
-  const wrapCollapsibleCode = (str) => {
+  const wrapCode = (code) =>  {
+    addMDLine(`\`\`\`\n${code}\n\`\`\``);
+  }
+
+  const wrapCollapsibleCode = (summary, str) => {
     addMDLine('<details>');
-    addMDLine('<summary>Show example: </summary>');
+    addMDLine(`<summary>${summary}: </summary>`);
     addMDLine();
-    addMDLine(`\`\`\`\n${str}\n\`\`\``);
+    wrapCode(str)
     addMDLine('</details>');
   }
 
@@ -314,8 +318,10 @@ const generateMD = (endpoints) => {
 
     for (const operation of Object.keys(endpoints[endpoint])) {
       const operationDetails = endpoints[endpoint][operation];
-      const specialisedRequestSchema = specialiseRequestBody(operationDetails.request);
-      const specialisedResponseSchema = specialiseRequestBody(operationDetails.response);
+      const expandedRequestSchema = expandRequestBody(operationDetails.request)
+      const specialisedRequestSchema = specialiseRequestBody(expandedRequestSchema);
+      const expandedResponseSchema = expandRequestBody(operationDetails.response)
+      const specialisedResponseSchema = specialiseRequestBody(expandedResponseSchema);
 
       addMDLine(`### ${titleCase(operation)}`);
       addMDLine();
@@ -324,14 +330,22 @@ const generateMD = (endpoints) => {
       if (specialisedRequestSchema != nullSchema) {
         addMDLine(`#### Request`);
         addMDLine();
-        wrapCollapsibleCode(`${JSON.stringify(JSONSchemaFaker.generate(specialisedRequestSchema, schemas))}`);
+        addMDLine(`Schema:`)
+        addMDLine();
+        wrapCollapsibleCode('Show Schema', prettyJSON(expandedRequestSchema));
+        addMDLine()
+        wrapCollapsibleCode('Show Example', `${prettyJSON(JSONSchemaFaker.generate(specialisedRequestSchema, schemas))}`);
         addMDLine();
       }
 
       if (specialisedResponseSchema != nullSchema) {
         addMDLine(`#### Response`);
         addMDLine();
-        wrapCollapsibleCode(`${JSON.stringify(JSONSchemaFaker.generate(specialisedResponseSchema, schemas))}`);
+        addMDLine(`Schema:`)
+        addMDLine();
+        wrapCollapsibleCode('Show Schema', prettyJSON(expandedResponseSchema));
+        addMDLine()
+        wrapCollapsibleCode('Show Example', `${prettyJSON(JSONSchemaFaker.generate(specialisedResponseSchema, schemas))}`);
         addMDLine();
       }
     }
@@ -354,8 +368,8 @@ const markdownSpec = generateMD(parsedYaml.endpoints);
 
 // console.log(JSON.stringify(openApiSpec, null, 2));
 
-fs.writeFileSync('./openapi.json', JSON.stringify(openApiSpec, null, 2));
-fs.writeFileSync('./json-rpc.json', JSON.stringify(jsonSpec, null, 2));
+fs.writeFileSync('./openapi.json', prettyJSON(openApiSpec));
+fs.writeFileSync('./json-rpc.json', prettyJSON(jsonSpec));
 fs.writeFileSync("./cip-spec.md", markdownSpec);
 
 console.warn(`Regenerated: openapi.json, json-rpc.json, cip-spec.md`);
