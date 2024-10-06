@@ -314,12 +314,13 @@ const generateMD = (endpoints) => {
       addMDLine();
       addMDLine(`${operationDetails.description}`);
       addMDLine();
+      addMDLine(`[Link to OpenApi endpoint](${pagesBaseURL}/get_${endpoint}_${operation})`)
+      addMDLine();
       if (specialisedRequestSchema != nullSchema) {
         addMDLine(`#### Request`);
         addMDLine();
         addMDLine(`Schema:`)
         addMDLine();
-        wrapCollapsibleCode('Show Schema', prettyJSON(expandedRequestSchema));
         addMDLine()
         wrapCollapsibleCode('Show Example', `${prettyJSON(JSONSchemaFaker.generate(specialisedRequestSchema, schemas))}`);
         addMDLine();
@@ -330,7 +331,6 @@ const generateMD = (endpoints) => {
         addMDLine();
         addMDLine(`Schema:`)
         addMDLine();
-        wrapCollapsibleCode('Show Schema', prettyJSON(expandedResponseSchema));
         addMDLine()
         wrapCollapsibleCode('Show Example', `${prettyJSON(JSONSchemaFaker.generate(specialisedResponseSchema, schemas))}`);
         addMDLine();
@@ -339,6 +339,8 @@ const generateMD = (endpoints) => {
   }
   return res;
 }
+
+const pagesBaseURL = 'https://nazrhom.github.io/query-layer-impl/index.html#/default';
 
 /*
 ---- Main ----
