@@ -145,14 +145,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "cardano-conway.json#/definitions/Address"
-                },
-                {
-                  "$ref": "cardano-babbage.json#/definitions/Address"
-                }
-              ]
+              "$ref": "cardano-babbage.json#/definitions/Address"
             }
           }
         ]

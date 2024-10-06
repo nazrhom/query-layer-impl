@@ -51,6 +51,15 @@ const buildTitle = (endpoint, operation, type) => {
 const buildAnyOfSchema = (alternatives) => alternatives.length == 1 ? alternatives[0] : ({ anyOf: alternatives });
 
 const makeAnyOfAlternatives = (type) => {
+  // We treat Address specially as conway simply removes one type of address from the spec
+  // We only apply this optimisation when the only schemas are babbage and conway in order
+  // to not introduce any mistakes in the future. This will need to be updated once
+  // support for a new schema is added.
+  if (type === 'Address' && schemas.length == 2) {
+    return [{
+      $ref: "cardano-babbage.json#/definitions/Address"
+    }]
+  }
   const alternatives = [];
 
   const altSet = new DeepSet(schemaRelativeCompare);
@@ -185,9 +194,7 @@ const buildObjectSchema = (endpoint, operation, body, type) => {
       throw new Error('unknown requestType ' + body);
     }
   }
-
   return schemaObj;
-
 };
 
 // Function to convert parsed YAML to OpenAPI format

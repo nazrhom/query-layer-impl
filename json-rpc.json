@@ -61,14 +61,7 @@
     "utxos/address:request": {
       "title": "utxos by address (request)",
       "type": "object",
-      "anyOf": [
-        {
-          "$ref": "cardano-conway.json#/definitions/Address"
-        },
-        {
-          "$ref": "cardano-babbage.json#/definitions/Address"
-        }
-      ]
+      "$ref": "cardano-babbage.json#/definitions/Address"
     },
     "utxos/address:response": {
       "title": "utxos by address (response)",
